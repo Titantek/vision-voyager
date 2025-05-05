@@ -1,6 +1,10 @@
 # Setup scitas ollama job
 
 ## Pull docker image
+
+Pull image in the `myimages` directory. You can change the path to your own directory.
+
+```bash
 `apptainer pull ollama.sif docker://ollama/ollama`
 
 ## Create a new scitas job
