@@ -25,6 +25,7 @@ class Voyager:
         env_request_timeout: int = 600,
         max_iterations: int = 160,
         reset_placed_if_failed: bool = False,
+        ollama:bool = False,
         action_agent_model_name: str = "gpt-4",
         action_agent_temperature: float = 0,
         action_agent_task_max_retries: int = 4,
@@ -112,10 +113,12 @@ class Voyager:
         self.max_iterations = max_iterations
 
         # set openai api key
-        os.environ["OPENAI_API_KEY"] = openai_api_key
+        if not ollama:
+            os.environ["OPENAI_API_KEY"] = openai_api_key
 
         # init agents
         self.action_agent = ActionAgent(
+            ollama=ollama,
             model_name=action_agent_model_name,
             temperature=action_agent_temperature,
             request_timout=openai_api_request_timeout,
@@ -126,6 +129,7 @@ class Voyager:
         )
         self.action_agent_task_max_retries = action_agent_task_max_retries
         self.curriculum_agent = CurriculumAgent(
+            ollama=ollama,
             model_name=curriculum_agent_model_name,
             temperature=curriculum_agent_temperature,
             qa_model_name=curriculum_agent_qa_model_name,
@@ -138,12 +142,14 @@ class Voyager:
             core_inventory_items=curriculum_agent_core_inventory_items,
         )
         self.critic_agent = CriticAgent(
+            ollama=ollama,
             model_name=critic_agent_model_name,
             temperature=critic_agent_temperature,
             request_timout=openai_api_request_timeout,
             mode=critic_agent_mode,
         )
         self.skill_manager = SkillManager(
+            ollama=ollama,
             model_name=skill_manager_model_name,
             temperature=skill_manager_temperature,
             retrieval_top_k=skill_manager_retrieval_top_k,
@@ -203,7 +209,7 @@ class Voyager:
     def step(self):
         if self.action_agent_rollout_num_iter < 0:
             raise ValueError("Agent must be reset before stepping")
-        ai_message = self.action_agent.llm(self.messages)
+        ai_message = self.action_agent.llm.invoke(self.messages)
         print(f"\033[34m****Action Agent ai message****\n{ai_message.content}\033[0m")
         self.conversations.append(
             (self.messages[0].content, self.messages[1].content, ai_message.content)
