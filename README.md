@@ -46,6 +46,8 @@ git clone https://github.com/MineDojo/Voyager
 cd Voyager
 pip install -e .
 ```
+`pip install langchain-community==<version of langchain>`
+
 
 ## Node.js Install
 In addition to the Python dependencies, you need to install the following Node.js packages:
@@ -54,6 +56,7 @@ cd voyager/env/mineflayer
 npm install -g npx
 npm install
 cd mineflayer-collectblock
+npm install
 npx tsc
 cd ..
 npm install
