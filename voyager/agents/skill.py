@@ -16,6 +16,7 @@ class SkillManager:
     def __init__(
         self,
         ollama=False,
+        ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
         temperature=0,
         retrieval_top_k=5,
@@ -24,8 +25,9 @@ class SkillManager:
         resume=False,
     ):
         if ollama:
-            self.embeddings = OllamaEmbeddings(model=model_name)
+            self.embeddings = OllamaEmbeddings(model=model_name, base_url=ollama_url)
             self.llm = ChatOllama(
+                base_url=ollama_url,
                 model=model_name,
                 temperature=temperature,
                 request_timeout=request_timout,

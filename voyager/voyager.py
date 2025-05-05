@@ -26,6 +26,7 @@ class Voyager:
         max_iterations: int = 160,
         reset_placed_if_failed: bool = False,
         ollama:bool = False,
+        ollama_url: str = "http://localhost:11434",
         action_agent_model_name: str = "gpt-4",
         action_agent_temperature: float = 0,
         action_agent_task_max_retries: int = 4,
@@ -119,6 +120,7 @@ class Voyager:
         # init agents
         self.action_agent = ActionAgent(
             ollama=ollama,
+            ollama_url=ollama_url,
             model_name=action_agent_model_name,
             temperature=action_agent_temperature,
             request_timout=openai_api_request_timeout,
@@ -130,6 +132,7 @@ class Voyager:
         self.action_agent_task_max_retries = action_agent_task_max_retries
         self.curriculum_agent = CurriculumAgent(
             ollama=ollama,
+            ollama_url=ollama_url,
             model_name=curriculum_agent_model_name,
             temperature=curriculum_agent_temperature,
             qa_model_name=curriculum_agent_qa_model_name,
@@ -143,6 +146,7 @@ class Voyager:
         )
         self.critic_agent = CriticAgent(
             ollama=ollama,
+            ollama_url=ollama_url,
             model_name=critic_agent_model_name,
             temperature=critic_agent_temperature,
             request_timout=openai_api_request_timeout,
@@ -150,6 +154,7 @@ class Voyager:
         )
         self.skill_manager = SkillManager(
             ollama=ollama,
+            ollama_url=ollama_url,
             model_name=skill_manager_model_name,
             temperature=skill_manager_temperature,
             retrieval_top_k=skill_manager_retrieval_top_k,

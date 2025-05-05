@@ -9,6 +9,7 @@ class CriticAgent:
     def __init__(
         self,
         ollama=False,
+        ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
         temperature=0,
         request_timout=120,
@@ -16,6 +17,7 @@ class CriticAgent:
     ):
         if ollama:
             self.llm = ChatOllama(
+                base_url=ollama_url,
                 model=model_name,
                 temperature=temperature,
                 request_timeout=request_timout,
