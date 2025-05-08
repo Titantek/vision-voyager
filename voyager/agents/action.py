@@ -41,7 +41,7 @@ class ActionAgent:
                 base_url=ollama_url,
                 model=model_name,
                 temperature=temperature,
-                request_timeout=request_timout,
+                timeout=request_timout,
             )
         else:
             self.llm = ChatOpenAI(

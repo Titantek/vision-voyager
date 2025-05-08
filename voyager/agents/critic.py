@@ -3,6 +3,7 @@ from voyager.utils.json_utils import fix_and_parse_json
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
+import re
 
 
 class CriticAgent:
@@ -20,7 +21,7 @@ class CriticAgent:
                 base_url=ollama_url,
                 model=model_name,
                 temperature=temperature,
-                request_timeout=request_timout,
+                timeout=request_timout,
             )
         else:
             self.llm = ChatOpenAI(
@@ -112,6 +113,7 @@ class CriticAgent:
         critic = self.llm.invoke(messages).content
         print(f"\033[31m****Critic Agent ai message****\n{critic}\033[0m")
         try:
+            critic = re.sub(r"```[a-zA-Z]*\n?", "", critic).strip()
             response = fix_and_parse_json(critic)
             assert response["success"] in [True, False]
             if "critique" not in response:

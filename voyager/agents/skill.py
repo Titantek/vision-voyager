@@ -25,12 +25,12 @@ class SkillManager:
         resume=False,
     ):
         if ollama:
-            self.embeddings = OllamaEmbeddings(model=model_name, base_url=ollama_url)
+            self.embeddings = OllamaEmbeddings(model="mistral-small", base_url=ollama_url)
             self.llm = ChatOllama(
                 base_url=ollama_url,
                 model=model_name,
                 temperature=temperature,
-                request_timeout=request_timout,
+                timeout=request_timout,
             )
         else:
             self.embeddings = OpenAIEmbeddings()
