@@ -50,6 +50,14 @@ pip install -e .
 
 
 ## Node.js Install
+
+To ensure that node-canvas-webgl work (doesn't work on Windows), you can use the following command :
+```
+sudo apt update
+sudo apt-get install -y build-essential pkg-config   libx11-dev libxi-dev libxext-dev   libgl1-mesa-dev libglu1-mesa-dev libglew-dev
+```
+
+
 In addition to the Python dependencies, you need to install the following Node.js packages:
 ```
 cd voyager/env/mineflayer
