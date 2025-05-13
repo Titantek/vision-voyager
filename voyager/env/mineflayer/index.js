@@ -1,4 +1,9 @@
 const fs = require("fs");
+
+const path = require("path");
+const puppeteer = require("puppeteer");
+const { mineflayer: mineflayerViewer } = require("prismarine-viewer");
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const mineflayer = require("mineflayer");
@@ -16,6 +21,10 @@ const Chests = require("./lib/observation/chests");
 const { plugin: tool } = require("mineflayer-tool");
 
 let bot = null;
+
+let browser, page, screenshotInterval;
+let episodeDir;
+let viewerServerPort = 3007;  // default; overridden by req.body.viewerPort if provided
 
 const app = express();
 
@@ -99,15 +108,15 @@ app.post("/start", (req, res) => {
         const tool = require("mineflayer-tool").plugin;
         const collectBlock = require("mineflayer-collectblock").plugin;
         const pvp = require("mineflayer-pvp").plugin;
-        const minecraftHawkEye = require("minecrafthawkeye");
+        // const minecraftHawkEye = require("minecrafthawkeye");
         bot.loadPlugin(pathfinder);
         bot.loadPlugin(tool);
         bot.loadPlugin(collectBlock);
         bot.loadPlugin(pvp);
-        bot.loadPlugin(minecraftHawkEye);
+        // bot.loadPlugin(minecraftHawkEye);
 
-        // bot.collectBlock.movements.digCost = 0;
-        // bot.collectBlock.movements.placeCost = 0;
+        bot.collectBlock.movements.digCost = 0;
+        bot.collectBlock.movements.placeCost = 0;
 
         obs.inject(bot, [
             OnChat,
@@ -132,6 +141,35 @@ app.post("/start", (req, res) => {
         initCounter(bot);
         bot.chat("/gamerule keepInventory true");
         bot.chat("/gamerule doDaylightCycle false");
+
+        // —— FPV frame capture setup ——
+        // create a per-episode folder
+        const epId = req.body.episodeId || Date.now();
+        episodeDir = path.join(__dirname, "fpv-episodes", `episode-${epId}`);
+        fs.mkdirSync(episodeDir, { recursive: true });
+
+        // start prismarine-viewer in first-person mode
+        viewerServerPort = req.body.viewerPort || viewerServerPort;
+        mineflayerViewer(bot, { port: viewerServerPort, firstPerson: true });
+
+        // launch Puppeteer and open the canvas
+        browser = await puppeteer.launch();
+        page    = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 720 });
+        await page.goto(`http://localhost:${viewerServerPort}`);
+        await page.waitForSelector("canvas");
+        const canvas = await page.$("canvas");
+
+        // initial screenshot
+        await canvas.screenshot({ path: path.join(episodeDir, "start.png") });
+
+        // every 5 seconds, grab another frame
+        screenshotInterval = setInterval(async () => {
+        const ts = Date.now();
+        await canvas.screenshot({
+            path: path.join(episodeDir, `step-${ts}.png`)
+        });
+        }, 5000);
     });
 
     function onConnectionFailed(e) {
@@ -398,7 +436,20 @@ app.post("/step", async (req, res) => {
     }
 });
 
-app.post("/stop", (req, res) => {
+app.post("/stop", async (req, res) => {
+    // final screenshot
+    if (page) {
+        const canvas = await page.$("canvas");
+        await canvas.screenshot({ path: path.join(episodeDir, "end.png") });
+    }
+
+    // stop the interval & close Puppeteer
+    if (screenshotInterval) clearInterval(screenshotInterval);
+    if (browser) await browser.close();
+
+    // shut down the viewer if it’s still up
+    if (bot.viewer) bot.viewer.close();
+
     bot.end();
     res.json({
         message: "Bot stopped",
