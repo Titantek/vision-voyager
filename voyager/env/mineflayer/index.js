@@ -26,6 +26,11 @@ let browser, page, screenshotInterval;
 let episodeDir;
 let viewerServerPort = 3007;  // default; overridden by req.body.viewerPort if provided
 
+let widthScreen = 1280;
+let heightScreen = 720;
+let intervalTime = 10000;
+let botChunkSize = 16;
+
 const app = express();
 
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -145,23 +150,20 @@ app.post("/start", (req, res) => {
         // —— FPV frame capture setup ——
         // create a per-episode folder
         const epId = req.body.episodeId || Date.now();
-        episodeDir = path.join(__dirname, "fpv-episodes", `episode-${epId}`);
+        episodeDir = path.join(__dirname, "runs", `run-${epId}`);
         fs.mkdirSync(episodeDir, { recursive: true });
 
         // start prismarine-viewer in first-person mode
         viewerServerPort = req.body.viewerPort || viewerServerPort;
-        mineflayerViewer(bot, { port: viewerServerPort, firstPerson: true });
+        mineflayerViewer(bot, { port: viewerServerPort, firstPerson: true , viewDistance: botChunkSize});
 
         // launch Puppeteer and open the canvas
         browser = await puppeteer.launch();
         page    = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
+        await page.setViewport({ width: widthScreen, height: heightScreen });
         await page.goto(`http://localhost:${viewerServerPort}`);
         await page.waitForSelector("canvas");
         const canvas = await page.$("canvas");
-
-        // initial screenshot
-        await canvas.screenshot({ path: path.join(episodeDir, "start.png") });
 
         // every 5 seconds, grab another frame
         screenshotInterval = setInterval(async () => {
@@ -169,7 +171,7 @@ app.post("/start", (req, res) => {
         await canvas.screenshot({
             path: path.join(episodeDir, `step-${ts}.png`)
         });
-        }, 5000);
+        }, intervalTime);
     });
 
     function onConnectionFailed(e) {

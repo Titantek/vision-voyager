@@ -11,6 +11,7 @@ from langchain_ollama import ChatOllama
 
 from voyager.prompts import load_prompt
 from voyager.control_primitives_context import load_control_primitives_context
+from voyager.utils.vision import get_vlm_images, format_api_query
 
 
 class ActionAgent:
@@ -19,6 +20,9 @@ class ActionAgent:
         ollama=False,
         ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
+        use_vision=False,
+        images_path="",
+        nb_images_to_use=1,
         temperature=0,
         request_timout=120,
         ckpt_dir="ckpt",
@@ -26,6 +30,12 @@ class ActionAgent:
         chat_log=True,
         execution_error=True,
     ):
+        # vision part
+        self.use_vision = use_vision
+        self.images_path = images_path
+        self.nb_images_to_use = nb_images_to_use
+
+        self.model_name = model_name
         self.ollama = ollama
         self.ckpt_dir = ckpt_dir
         self.chat_log = chat_log
@@ -97,7 +107,7 @@ class ActionAgent:
             "killMob",
         ]
 
-        if not self.llm.model_name == "gpt-3.5-turbo":
+        if not self.model_name == "gpt-3.5-turbo":
             base_skills += [
                 "useChest",
                 "mineflayer",
@@ -141,6 +151,7 @@ class ActionAgent:
                 inventory = event["inventory"]
                 assert i == len(events) - 1, "observe must be the last event"
 
+        contents = []
         observation = ""
 
         if code:
@@ -210,7 +221,21 @@ class ActionAgent:
         else:
             observation += f"Critique: None\n\n"
 
-        return HumanMessage(content=observation)
+        # Add image content
+        if self.use_vision:
+            try:
+                images = get_vlm_images(self.images_path, nb_images=self.nb_images_to_use)
+                for img in images:
+                    contents.append(format_api_query(img, self.ollama))
+            except Exception as e:
+                print(f"Error loading images: {e}")
+
+        contents.append({
+            "type": "text",
+            "text": observation
+        })
+
+        return HumanMessage(content=contents)
 
     def process_ai_message(self, message):
         assert isinstance(message, AIMessage)

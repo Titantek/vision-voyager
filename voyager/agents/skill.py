@@ -10,6 +10,7 @@ from langchain_ollama import ChatOllama
 
 from voyager.prompts import load_prompt
 from voyager.control_primitives import load_control_primitives
+from voyager.utils.vision import get_vlm_images, format_api_query
 
 
 class SkillManager:
@@ -18,12 +19,22 @@ class SkillManager:
         ollama=False,
         ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
+        use_vision=False,
+        images_path="",
+        nb_images_to_use=1,
         temperature=0,
         retrieval_top_k=5,
         request_timout=120,
         ckpt_dir="ckpt",
         resume=False,
     ):
+        
+        # vision part
+        self.use_vision = use_vision
+        self.images_path = images_path
+        self.nb_images_to_use = nb_images_to_use
+        self.ollama = ollama
+
         if ollama:
             self.embeddings = OllamaEmbeddings(model="mistral-small", base_url=ollama_url)
             self.llm = ChatOllama(
@@ -113,14 +124,26 @@ class SkillManager:
         U.dump_json(self.skills, f"{self.ckpt_dir}/skill/skills.json")
 
     def generate_skill_description(self, program_name, program_code):
+        contents = []
+
+        if self.use_vision:
+            try:
+                images = get_vlm_images(self.images_path, nb_images=self.nb_images_to_use)
+                for img in images:
+                    contents.append(format_api_query(img, self.ollama))
+            except Exception as e:
+                print(f"Error loading images: {e}")
+            
+        contents.append({
+            "type": "text",
+            "text": f"{program_code}\n\nThe main function is `{program_name}`.",
+        })
+
         messages = [
             SystemMessage(content=load_prompt("skill")),
-            HumanMessage(
-                content=program_code
-                + "\n\n"
-                + f"The main function is `{program_name}`."
-            ),
+            HumanMessage(content=contents),
         ]
+
         skill_description = f"    // { self.llm.invoke(messages).content}"
         return f"async function {program_name}(bot) {{\n{skill_description}\n}}"
 

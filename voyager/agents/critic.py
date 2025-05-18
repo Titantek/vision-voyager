@@ -1,5 +1,6 @@
 from voyager.prompts import load_prompt
 from voyager.utils.json_utils import fix_and_parse_json
+from voyager.utils.vision import get_vlm_images, format_api_query
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
@@ -12,10 +13,19 @@ class CriticAgent:
         ollama=False,
         ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
+        use_vision=False,
+        images_path="",
+        nb_images_to_use=1,
         temperature=0,
         request_timout=120,
         mode="auto",
     ):
+        # vision part
+        self.use_vision = use_vision
+        self.images_path = images_path
+        self.nb_images_to_use = nb_images_to_use
+        self.ollama = ollama
+
         if ollama:
             self.llm = ChatOllama(
                 base_url=ollama_url,
@@ -53,6 +63,7 @@ class CriticAgent:
                 print(f"\033[31mCritic Agent: Error occurs {event['onError']}\033[0m")
                 return None
 
+        contents = []
         observation = ""
 
         observation += f"Biome: {biome}\n\n"
@@ -86,6 +97,21 @@ class CriticAgent:
             observation += f"Context: None\n\n"
 
         print(f"\033[31m****Critic Agent human message****\n{observation}\033[0m")
+        
+        # Add image content
+        if self.use_vision:
+            try:
+                images = get_vlm_images(self.images_path, nb_images=self.nb_images_to_use)
+                for img in images:
+                    contents.append(format_api_query(img, self.ollama))
+            except Exception as e:
+                print(f"Error loading images: {e}")
+
+        contents.append({
+            "type": "text",
+            "text": observation
+        })
+
         return HumanMessage(content=observation)
 
     def human_check_task_success(self):
