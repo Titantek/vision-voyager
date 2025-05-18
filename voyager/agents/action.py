@@ -97,7 +97,7 @@ class ActionAgent:
             "killMob",
         ]
 
-        if not self.ollama and  not self.llm.model_name == "gpt-3.5-turbo":
+        if not self.llm.model_name == "gpt-3.5-turbo":
             base_skills += [
                 "useChest",
                 "mineflayer",
