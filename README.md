@@ -51,10 +51,12 @@ pip install -e .
 
 ## Node.js Install
 
+**WARNING**: Tested only on Ubuntu 22.04. We recommend using Ubuntu 22.04 for the best experience.
+
 To ensure that node-canvas-webgl work (doesn't work on Windows), you can use the following command :
 ```
 sudo apt update
-sudo apt-get install -y build-essential pkg-config   libx11-dev libxi-dev libxext-dev   libgl1-mesa-dev libglu1-mesa-dev libglew-dev
+sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxext-dev   libgl1-mesa-dev libglu1-mesa-dev libglew-dev
 ```
 
 
@@ -69,6 +71,8 @@ npx tsc
 cd ..
 npm install
 ```
+
+
 
 ## Minecraft Instance Install
 
