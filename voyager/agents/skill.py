@@ -1,10 +1,12 @@
 import os
 
 import voyager.utils as U
-from langchain.chat_models import ChatOpenAI
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain.schema import HumanMessage, SystemMessage
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
+from langchain_ollama import ChatOllama
 
 from voyager.prompts import load_prompt
 from voyager.control_primitives import load_control_primitives
@@ -13,6 +15,8 @@ from voyager.control_primitives import load_control_primitives
 class SkillManager:
     def __init__(
         self,
+        ollama=False,
+        ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
         temperature=0,
         retrieval_top_k=5,
@@ -20,11 +24,21 @@ class SkillManager:
         ckpt_dir="ckpt",
         resume=False,
     ):
-        self.llm = ChatOpenAI(
-            model_name=model_name,
-            temperature=temperature,
-            request_timeout=request_timout,
-        )
+        if ollama:
+            self.embeddings = OllamaEmbeddings(model="mistral-small", base_url=ollama_url)
+            self.llm = ChatOllama(
+                base_url=ollama_url,
+                model=model_name,
+                temperature=temperature,
+                timeout=request_timout,
+            )
+        else:
+            self.embeddings = OpenAIEmbeddings()
+            self.llm = ChatOpenAI(
+                model=model_name,
+                temperature=temperature,
+                timeout=request_timout,
+            )
         U.f_mkdir(f"{ckpt_dir}/skill/code")
         U.f_mkdir(f"{ckpt_dir}/skill/description")
         U.f_mkdir(f"{ckpt_dir}/skill/vectordb")
@@ -39,7 +53,7 @@ class SkillManager:
         self.ckpt_dir = ckpt_dir
         self.vectordb = Chroma(
             collection_name="skill_vectordb",
-            embedding_function=OpenAIEmbeddings(),
+            embedding_function=self.embeddings,
             persist_directory=f"{ckpt_dir}/skill/vectordb",
         )
         assert self.vectordb._collection.count() == len(self.skills), (
@@ -97,7 +111,6 @@ class SkillManager:
             f"{self.ckpt_dir}/skill/description/{dumped_program_name}.txt",
         )
         U.dump_json(self.skills, f"{self.ckpt_dir}/skill/skills.json")
-        self.vectordb.persist()
 
     def generate_skill_description(self, program_name, program_code):
         messages = [
@@ -108,7 +121,7 @@ class SkillManager:
                 + f"The main function is `{program_name}`."
             ),
         ]
-        skill_description = f"    // { self.llm(messages).content}"
+        skill_description = f"    // { self.llm.invoke(messages).content}"
         return f"async function {program_name}(bot) {{\n{skill_description}\n}}"
 
     def retrieve_skills(self, query):
