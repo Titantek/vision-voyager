@@ -12,6 +12,8 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_chroma import Chroma
+from voyager.utils.vision import get_vlm_images, format_api_query
+
 
 class CurriculumAgent:
     def __init__(
@@ -19,6 +21,9 @@ class CurriculumAgent:
         ollama=False,
         ollama_url="http://localhost:12345",
         model_name="gpt-3.5-turbo",
+        use_vision=False,
+        images_path="",
+        nb_images_to_use=1,
         temperature=0,
         qa_model_name="gpt-3.5-turbo",
         qa_temperature=0,
@@ -29,6 +34,12 @@ class CurriculumAgent:
         warm_up=None,
         core_inventory_items: str | None = None,
     ):
+        # vision part
+        self.use_vision = use_vision
+        self.images_path = images_path
+        self.nb_images_to_use = nb_images_to_use
+        self.ollama = ollama
+
         if ollama:
             self.embeddings = OllamaEmbeddings(model="mistral-small", base_url=ollama_url)
             self.llm = ChatOllama(
@@ -226,7 +237,8 @@ class CurriculumAgent:
         return observation
 
     def render_human_message(self, *, events, chest_observation):
-        content = ""
+        contents = []
+
         observation = self.render_observation(
             events=events, chest_observation=chest_observation
         )
@@ -244,6 +256,7 @@ class CurriculumAgent:
                 if i > 5:
                     break
 
+        content = ""
         for key in self.curriculum_observations:
             if self.progress >= self.warm_up[key]:
                 if self.warm_up[key] != 0:
@@ -252,9 +265,23 @@ class CurriculumAgent:
                     should_include = True
                 if should_include:
                     content += observation[key]
+        
+        # Add image content if vision is enabled
+        if self.use_vision:
+            try:
+                images = get_vlm_images(self.images_path, nb_images=self.nb_images_to_use)
+                for img in images:
+                    contents.append(format_api_query(img, self.ollama))
+            except Exception as e:
+                print(f"Error loading images: {e}")
+
+        contents.append({
+            "type": "text",
+            "text": content
+        })
 
         print(f"\033[35m****Curriculum Agent human message****\n{content}\033[0m")
-        return HumanMessage(content=content)
+        return HumanMessage(content=contents)
 
     def propose_next_task(self, *, events, chest_observation, max_retries=5):
         if self.progress == 0 and self.mode == "auto":

@@ -27,6 +27,9 @@ class Voyager:
         reset_placed_if_failed: bool = False,
         ollama:bool = False,
         ollama_url: str = "http://localhost:11434",
+        use_vision=False,
+        images_path="",
+        nb_images_to_use=1,
         action_agent_model_name: str = "gpt-4",
         action_agent_temperature: float = 0,
         action_agent_task_max_retries: int = 4,
@@ -66,6 +69,12 @@ class Voyager:
         :param env_request_timeout: how many seconds to wait for each step, if the code execution exceeds this time,
         python side will terminate the connection and need to be resumed
         :param reset_placed_if_failed: whether to reset placed blocks if failed, useful for building task
+        :param max_iterations: how many iterations to run
+        :param ollama: whether to use ollama
+        :param ollama_url: ollama url
+        :param use_vision: whether to use vision
+        :param images_path: path to the images (fpv of the bot saved in js)
+        :param nb_images_to_use: how many images to use
         :param action_agent_model_name: action agent model name
         :param action_agent_temperature: action agent temperature
         :param action_agent_task_max_retries: how many times to retry if failed
@@ -122,6 +131,9 @@ class Voyager:
             ollama=ollama,
             ollama_url=ollama_url,
             model_name=action_agent_model_name,
+            use_vision=False,
+            images_path=images_path,
+            nb_images_to_use=nb_images_to_use,
             temperature=action_agent_temperature,
             request_timout=openai_api_request_timeout,
             ckpt_dir=ckpt_dir,
@@ -134,6 +146,9 @@ class Voyager:
             ollama=ollama,
             ollama_url=ollama_url,
             model_name=curriculum_agent_model_name,
+            use_vision=use_vision,
+            images_path=images_path,
+            nb_images_to_use=nb_images_to_use,
             temperature=curriculum_agent_temperature,
             qa_model_name=curriculum_agent_qa_model_name,
             qa_temperature=curriculum_agent_qa_temperature,
@@ -147,6 +162,9 @@ class Voyager:
         self.critic_agent = CriticAgent(
             ollama=ollama,
             ollama_url=ollama_url,
+            use_vision=use_vision,
+            images_path=images_path,
+            nb_images_to_use=nb_images_to_use,
             model_name=critic_agent_model_name,
             temperature=critic_agent_temperature,
             request_timout=openai_api_request_timeout,
@@ -155,6 +173,9 @@ class Voyager:
         self.skill_manager = SkillManager(
             ollama=ollama,
             ollama_url=ollama_url,
+            use_vision=False,
+            images_path=images_path,
+            nb_images_to_use=nb_images_to_use,
             model_name=skill_manager_model_name,
             temperature=skill_manager_temperature,
             retrieval_top_k=skill_manager_retrieval_top_k,
@@ -202,7 +223,7 @@ class Voyager:
         )
         self.messages = [system_message, human_message]
         print(
-            f"\033[32m****Action Agent human message****\n{human_message.content}\033[0m"
+            f"\033[32m****Action Agent human message****\n{human_message.content[-1]['text']}\033[0m"
         )
         assert len(self.messages) == 2
         self.conversations = []
@@ -291,7 +312,7 @@ class Voyager:
             info["program_name"] = parsed_result["program_name"]
         else:
             print(
-                f"\033[32m****Action Agent human message****\n{self.messages[-1].content}\033[0m"
+                f"\033[32m****Action Agent human message****\n{self.messages[-1].content[-1]}\033[0m"
             )
         return self.messages, 0, done, info
 
