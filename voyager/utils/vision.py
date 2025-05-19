@@ -20,9 +20,12 @@ def get_vlm_images(folder_path, nb_images=1, symbol_split="-"):
     if len(subdir) == 1:
         dir_name = subdir[0]
     else:
-        dir_name = subdir[-2]
+        if len(os.listdir(os.path.join(folder_path, subdir[-1]))) == 0:
+            dir_name = subdir[-2]
+        else:
+            dir_name = subdir[-1]
 
-    # print(f"Using images from {dir_name}")
+    print(f"Using {nb_images} images from {dir_name}")
     
     images = []
     for filename in os.listdir(os.path.join(folder_path, dir_name)):
