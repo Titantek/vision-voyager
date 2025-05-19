@@ -31,7 +31,7 @@ def load_skills(skills_path):
 
 def regenerate_vector_db(skills, db_path, embeddings):
     if os.path.exists(db_path):
-        print(f"\n🧹 Deleting existing vector DB at {db_path}...")
+        print(f"\nDeleting existing vector DB at {db_path}...")
         os.system(f"rm -rf {db_path}")
 
     client = chromadb.PersistentClient(path=db_path)
@@ -48,11 +48,11 @@ def regenerate_vector_db(skills, db_path, embeddings):
             metadatas=[{"name": name}],
         )
 
-    print(f"✅ Regenerated {len(skills)} skills in vector DB!")
+    print(f"Regenerated {len(skills)} skills in vector DB!")
 
 
 def migrate():
-    print("🛠 Skill Library Vector DB Regenerator")
+    print("Skill Library Vector DB Regenerator")
 
     base_path = "skill_library"
     libraries = list_skill_libraries(base_path)
@@ -66,7 +66,7 @@ def migrate():
     vectordb_path = skill_dir / "vectordb"
 
     if not skills_path.exists():
-        print(f"❌ skills.json not found in {skill_dir}")
+        print(f"skills.json not found in {skill_dir}")
         return
 
     embedding_choice = choose_from_list("Choose embedding provider:", ["OpenAI", "Ollama"])
@@ -80,37 +80,6 @@ def migrate():
     skills = load_skills(skills_path)
     regenerate_vector_db(skills, str(vectordb_path), embeddings)
 
-# voyager = Voyager(
-#     mc_port=45595,
-#     # openai_api_key=openai_api_key,
-#     # action_agent_model_name = "gpt-4.1",
-#     # curriculum_agent_model_name = "gpt-4.1",
-#     # critic_agent_model_name = "gpt-4.1",
-#     # skill_manager_model_name = "gpt-4.1",
-#     # curriculum_agent_qa_model_name = "gpt-4.1",
-#     # ckpt_dir="ckpt_gpt-vision",
-#     # skill_library_dir="./skill_library/trial1",
-#     # resume=False,
-
-#     use_vision=True,
-#     images_path="./voyager/env/mineflayer/runs",
-#     nb_images_to_use=1,
-#     ollama=True,
-#     action_agent_model_name = "codestral",
-#     curriculum_agent_model_name = "mistral-small3.1",
-#     critic_agent_model_name = "mistral-small3.1",
-#     skill_manager_model_name = "codestral",
-#     curriculum_agent_qa_model_name = "mistral-small3.1",
-#     ollama_url="http://localhost:5000"
-# )
-# task = "Craft a diamond pickaxe" # e.g. "Craft a diamond pickaxe"
-# sub_goals = voyager.decompose_task(task=task)
-# # start lifelong learning
-# voyager.inference(sub_goals=sub_goals)
-
-
-
-# voyager.learn()
 
 if __name__ == "__main__":
 
@@ -167,10 +136,11 @@ if __name__ == "__main__":
     use_vision = input("Do you want to use vision? (y/n): ").strip().lower()
     if use_vision == 'y':
         # ask the user to enter the path to the images
-
+        use_vision = True
         images_path = "./voyager/env/mineflayer/runs"
         nb_images_to_use = int(input("Enter the number of images to use: ").strip())
     else:
+        use_vision = False
         images_path = None
         nb_images_to_use = 0
 
@@ -201,15 +171,17 @@ if __name__ == "__main__":
         else:
             selected_models[key] = model
             ollama = False
+    
+    resume = input("Do you to start from last checkpoint? (y/n): ").strip().lower()
+    resume = True if resume == 'y' else False
 
     # create_ckpt_dir with above info take just the curriculum agent model task and vision and the selected task add also name of skill library if any
-    ckpt_dir = f"ckpt_{selected_models['curriculum_agent_model_name']}_{task.replace(' ','_')}_{'vision' if use_vision=='y' else ''}_{selected_library}"
+    ckpt_dir = f"ckpt_{selected_models['curriculum_agent_model_name']}_{task.replace(' ','_')}_{'vision' if use_vision else ''}_{selected_library}"
 
     if task != "Explore":
         max_iterations = 50
     else:
         max_iterations = 160
-
 
     # build the voyager instance with the selected models
     voyager = Voyager(
@@ -229,8 +201,8 @@ if __name__ == "__main__":
         skill_manager_model_name=selected_models["skill_manager_model_name"],
         curriculum_agent_qa_model_name=selected_models["curriculum_agent_qa_model_name"],
         ollama_url="http://localhost:5000",
+        resume=resume
     )
-
 
     if task == "Explore":
         # if the user selected "Explore", call the explore method
@@ -238,6 +210,4 @@ if __name__ == "__main__":
     else:
         # if the user selected a task, call the inference method
         voyager.inference(task=task)
-
-
     
