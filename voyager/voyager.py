@@ -223,7 +223,7 @@ class Voyager:
         )
         self.messages = [system_message, human_message]
         print(
-            f"\033[32m****Action Agent human message****\n{human_message.content[-1]}\033[0m"
+            f"\033[32m****Action Agent human message****\n{human_message.content[-1]['text']}\033[0m"
         )
         assert len(self.messages) == 2
         self.conversations = []
