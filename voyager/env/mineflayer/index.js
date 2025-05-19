@@ -29,7 +29,7 @@ let viewerServerPort = 3007;  // default; overridden by req.body.viewerPort if p
 let widthScreen = 1280;
 let heightScreen = 720;
 let intervalTime = 10000;
-let botChunkSize = 16;
+let botChunkSize = 10;
 
 const app = express();
 
