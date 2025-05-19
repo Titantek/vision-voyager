@@ -174,7 +174,7 @@ if __name__ == "__main__":
             selected_models[key] = model
             ollama = False
     
-    resume = input("Do you to start from last checkpoint? (y/n): ").strip().lower()
+    resume = input("Do you want to start from last checkpoint? (y/n): ").strip().lower()
     resume = True if resume == 'y' else False
 
     # create_ckpt_dir with above info take just the curriculum agent model task and vision and the selected task add also name of skill library if any
