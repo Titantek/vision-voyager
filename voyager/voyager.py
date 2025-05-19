@@ -131,7 +131,7 @@ class Voyager:
             ollama=ollama,
             ollama_url=ollama_url,
             model_name=action_agent_model_name,
-            use_vision=use_vision,
+            use_vision=False,
             images_path=images_path,
             nb_images_to_use=nb_images_to_use,
             temperature=action_agent_temperature,
@@ -173,7 +173,7 @@ class Voyager:
         self.skill_manager = SkillManager(
             ollama=ollama,
             ollama_url=ollama_url,
-            use_vision=use_vision,
+            use_vision=False,
             images_path=images_path,
             nb_images_to_use=nb_images_to_use,
             model_name=skill_manager_model_name,
