@@ -312,7 +312,7 @@ class Voyager:
             info["program_name"] = parsed_result["program_name"]
         else:
             print(
-                f"\033[32m****Action Agent human message****\n{self.messages[-1].content[-1]}\033[0m"
+                f"\033[32m****Action Agent human message****\n{self.messages[-1].content[-1]['text']}\033[0m"
             )
         return self.messages, 0, done, info
 
