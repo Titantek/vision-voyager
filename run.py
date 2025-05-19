@@ -10,7 +10,7 @@ import chromadb
 openai_api_key = "YOUR_OPENAI_API_KEY"  # Replace with your OpenAI API key
 
 def list_skill_libraries(base_path="skill_library"):
-    return [f.name for f in Path(base_path).iterdir() if f.is_dir()]
+    return sorted([f.name for f in Path(base_path).iterdir() if f.is_dir()])
 
 
 def choose_from_list(prompt, options):
@@ -104,12 +104,14 @@ if __name__ == "__main__":
 
     # ask the user to select a task from the list
     print("Select a task from the list:")
+    
     for i, task in enumerate(list_of_tasks):
         print(f"{i + 1}. {task}")
     task_choice = int(input("Enter the number of your choice: ")) - 1
     if task_choice < 0 or task_choice >= len(list_of_tasks):
         print("Invalid choice. Exiting.")
         exit(1)
+
     task = list_of_tasks[task_choice]
     print(f"You selected: {task}")
     # ask the user if he wants to use a skill library
