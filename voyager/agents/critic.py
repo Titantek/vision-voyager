@@ -106,6 +106,8 @@ class CriticAgent:
                     contents.append(format_api_query(img, self.ollama))
             except Exception as e:
                 print(f"Error loading images: {e}")
+            
+            content += "\nRefer to the given image (first person view of the bot) to understand the bot's surroundings better.\n"
 
         contents.append({
             "type": "text",

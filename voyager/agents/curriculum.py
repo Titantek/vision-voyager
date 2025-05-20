@@ -272,6 +272,8 @@ class CurriculumAgent:
                 images = get_vlm_images(self.images_path, nb_images=self.nb_images_to_use)
                 for img in images:
                     contents.append(format_api_query(img, self.ollama))
+                
+                content += "\nRefer to the given image (first person view of the bot) to understand the bot's surroundings better.\n"
             except Exception as e:
                 print(f"Error loading images: {e}")
 
