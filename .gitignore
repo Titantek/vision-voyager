@@ -130,3 +130,5 @@ debug_*
 logs/
 plot_iter.py
 *.svg
+icons/
+skill_library/
