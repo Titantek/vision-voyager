@@ -102,7 +102,16 @@ Follow the instructions in [Fabric Mods Install](installation/fabric_mods_instal
 # Getting Started
 Voyager uses OpenAI's GPT-4 as the language model. You need to have an OpenAI API key to use Voyager. You can get one from [here](https://platform.openai.com/account/api-keys).
 
-After the installation process, you can run Voyager by:
+After the installation process, you can run Voyager by executing the following command in the root directory of Voyager (make sure you have set up an OpenAI API key or ollama instance and a Minecraft instance):
+
+```bash
+python run.py
+```
+
+or you can create your own script to run Voyager. Here is an example script to run Voyager with Azure Login and OpenAI API key:
+
+
+
 ```python
 from voyager import Voyager
 
