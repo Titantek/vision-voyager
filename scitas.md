@@ -89,6 +89,6 @@ tmux attach -t ollama
 ## Port forwarding
 To access the server from your local machine, you need to set up port forwarding. You can do this using SSH. Replace `<local_port>` with the port you want to use on your local machine, `<node_ip>` with the node ID you got from `hostname -i`, and `<host_port>` with the port you used in `export OLLAMA_HOST`.
 ```bash
-ssh -L <local_port>:<node_ip>:<host_port> -l <user> izar.epfl.ch -f -N
+ssh -L <local_port>:10.91.27.<X>:<host_port> -l <user> izar.epfl.ch -f -N
 ```
 
