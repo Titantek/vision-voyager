@@ -5,7 +5,7 @@ setuptools
 openai
 chardet
 cchardet
-chromadb==0.3.29
+chromadb
 tiktoken
 requests
 setuptools
@@ -13,5 +13,6 @@ gymnasium
 psutil
 minecraft_launcher_lib
 langchain-ollama
+langchain-community
 langchain-openai
 langchain-chroma
