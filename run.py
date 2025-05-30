@@ -7,7 +7,7 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_ollama.embeddings import  OllamaEmbeddings
 import chromadb
 
-openai_api_key = "YOUR_OPENAI_API_KEY"  # Replace with your OpenAI API key
+openai_api_key = "YOUR_OPENAI_KEY"  # Replace with your OpenAI API key
 
 def list_skill_libraries(base_path="skill_library"):
     return sorted([f.name for f in Path(base_path).iterdir() if f.is_dir()])
@@ -89,6 +89,7 @@ if __name__ == "__main__":
     "Craft a Golden Sword",
     "Collect a Lava Bucket",
     "Craft a Compass",
+    "Build a House",
 ]
 
     list_of_models = [
@@ -211,5 +212,7 @@ if __name__ == "__main__":
         voyager.learn()
     else:
         # if the user selected a task, call the inference method
+
         voyager.inference(task=task)
+
     
