@@ -45,12 +45,14 @@ def get_vlm_images(folder_path, nb_images=1, symbol_split="-"):
             nb_images = len(images)
         
         images_to_return = []
-        images_to_return.append(convert_image_to_base64(images[0]))
+        # images_to_return.append(convert_image_to_base64(images[0]))
 
-        for i in range(1, nb_images - 1):
-            images_to_return.append(convert_image_to_base64(images[int(i * len(images) / (nb_images - 1))]))
+        # for i in range(1, nb_images - 1):
+        #     images_to_return.append(convert_image_to_base64(images[int(i * len(images) / (nb_images - 1))]))
 
-        images_to_return.append(convert_image_to_base64(images[-1]))
+        # images_to_return.append(convert_image_to_base64(images[-1]))
+        for i in range(nb_images):
+            images_to_return.append(convert_image_to_base64(images[-i]))
         return images_to_return
 
 
