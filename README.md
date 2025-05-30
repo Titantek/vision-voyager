@@ -172,6 +172,3 @@ voyager.inference(sub_goals=sub_goals)
 ```
 
 For all valid skill libraries, see [Learned Skill Libraries](skill_library/README.md).
-
-# FAQ
-If you have any questions, please check our [FAQ](FAQ.md) first before opening an issue.
