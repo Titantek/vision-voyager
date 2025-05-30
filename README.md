@@ -49,7 +49,7 @@ vision-voyager
 │    │   ├── vision.py              <-- Manage vision
 │    │   ├── json_utils.py
 │    │   └── ...
-├── migrate_skill_library.py
+├── migrate_skill_library.py    <-- Migrate skill library with new version of chromaDB
 ├── run.py                            <-- Script to launch the agent (Add your openai-key)
 ├── scitas.md                          <-- Scitas ollama setup
 └── README.md
