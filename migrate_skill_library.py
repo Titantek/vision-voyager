@@ -49,7 +49,7 @@ def regenerate_vector_db(skills, db_path, embeddings):
     print(f"✅ Regenerated {len(skills)} skills in vector DB!")
 
 
-def main():
+def migrate():
     print("🛠 Skill Library Vector DB Regenerator")
 
     base_path = "skill_library"
@@ -72,7 +72,7 @@ def main():
         embeddings = OpenAIEmbeddings()
     else:
         model = input("Enter Ollama model (default: mistral): ") or "mistral"
-        base_url = input("Enter Ollama base URL (default: http://localhost:11434): ") or "http://localhost:11434"
+        base_url = input("Enter Ollama base URL (default: http://localhost:5000): ") or "http://localhost:5000"
         embeddings = OllamaEmbeddings(model=model, base_url=base_url)
 
     skills = load_skills(skills_path)
@@ -80,5 +80,5 @@ def main():
 
 
 if __name__ == "__main__":
-    os.environ["OPENAI_API_KEY"] = "API-KEY" # TODO : SET YOUR API KEY
-    main()
+    os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_KEY" # TODO : SET YOUR API KEY
+    migrate()
